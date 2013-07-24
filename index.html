@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Front-End Difference</title>
+    <script src="//demo.musashi:3000/v1/abba.js"></script>
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <style type="text/css">
+      button {
+        margin-top: 5px;
+        margin-bottom: 5px;
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <div class="row">
+
+      <div class="span4">
+
+        <div class="controls" style="margin:10px;">
+          <div id="bucket-name"></div>
+          <div class="btn-group">
+            <button class="btn btn-info dropdown-toggle" data-toggle="dropdown">Force a Bucket <span class="caret"></span></button>
+            <ul class="dropdown-menu">
+              <li><a href="#" id="setControl">Control bucket</a></li>
+              <li><a href="#" id="setVariant">Variant bucket</a></li>
+            </ul>
+          </div>
+
+          <button class="btn" id="clearTestCookie">Clear bucket cookie</button><br /><br />
+          <ul class="unstyled">
+            <li><a href="http://demo.musashi:3000/admin/experiments" target="_blank">Load Dashboard</a></li>
+            <li><a href="/fe-diff.html">Front-End Diff.</a></li>
+            <li><a href="/be-diff.html">Back-End Diff.</a></li>
+          </ul>
+
+        </div>
+      </div>
+
+      <div class="span8">
+
+        <h2>Sandbox for AB Testing (FE)</h2>
+
+        <div>
+          <button class="btn btn-success" id="actionLink" style="display:none;">Take Action</button>
+        </div>
+
+        <div class="alert" style="width: 400px;display:none;margin-top:10px;">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          <div id="feedback"></div>
+        </div>
+      </div>
+
+    </div>
+    
+    <script src="http://code.jquery.com/jquery.js"></script>
+    <script src="/bootstrap/js/bootstrap.min.js"></script>
+
+    <script>
+      var testName = 'Direct vs. Polite CTA';
+      var controlName = 'Direct';
+      var variantName = 'Polite';
+      var abTrackingCookieName = 'abbaVariant_'+escape(testName);
+      
+      setupControl = function() {
+        $('#actionLink')
+          .html("Take Action")
+          .show();
+      };
+
+      setupVariant = function() {
+        $('#actionLink')
+          .html("Please Take Action")
+          .show();
+      };
+
+      Abba(testName)
+        .control(controlName, function(){
+          setupControl();
+        })
+        .variant(variantName, function(){
+          setupVariant();
+        })
+        .start();
+
+      setCookie = function(c_name, value, expires) {
+        var c_value=escape(value) + ((expires==null) ? "; " : "; expires="+setExpiration(expires) +  "; path=/");
+        document.cookie=c_name + "=" + c_value;
+      };
+      
+      setExpiration = function(expires) {
+        var expt = new Date(expires);
+        return expt.toGMTString();
+      }
+      
+      getCookie = function(name) {
+        var dc = document.cookie;
+        var begin = dc.indexOf(name);
+        var end = (dc.indexOf(";", begin) == -1) ? dc.length : dc.indexOf(";", begin);
+
+        return unescape(dc.substring((begin + (name.length + 1)), end));
+      }
+
+      deleteCookie = function(c_name) {
+        var today = new Date();
+        setCookie(c_name, '', (new Date(today.getTime() - 24 * 60 * 60 * 1000)));
+      };
+
+      clearABTestCookie = function() {
+        deleteCookie(abTrackingCookieName);
+      };
+
+      $(document).ready(function() {
+
+        $('#bucket-name').html("Bucket: "+getCookie(abTrackingCookieName));
+
+        $('#actionLink').click(function(e) {
+          // On successful conversion
+          Abba(testName).complete();
+          $('#feedback').html("link clicked, test completed");
+          $('.alert').show();
+        });
+
+        $('#setControl').click(function(e) {
+          setCookie(abTrackingCookieName, controlName, null);
+          window.location.reload(true);
+        });
+
+        $('#setVariant').click(function(e) {
+          setCookie(abTrackingCookieName, variantName, null);
+          window.location.reload(true);
+        });
+
+        $('#clearTestCookie').click(function(e) {
+          clearABTestCookie();
+          window.location.reload(true);
+        });
+
+      });
+
+    </script>
+  </body>
+
+</html>
