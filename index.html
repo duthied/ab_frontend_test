@@ -43,6 +43,18 @@
         <h2>Sandbox for AB Testing (FE)</h2>
 
         <div>
+          <button class="btn btn-info" id="signal1">Fire Signal 1</button>
+        </div>
+
+        <div>
+          <button class="btn btn-info" id="signal2">Fire Signal 2</button>
+        </div>
+
+        <div>
+          <button class="btn btn-info" id="signal3">Fire Signal 3</button>
+        </div>
+
+        <div>
           <button class="btn btn-success" id="actionLink" style="display:none;">Take Action</button>
         </div>
 
@@ -113,13 +125,40 @@
 
       $(document).ready(function() {
 
-        $('#bucket-name').html("Bucket: "+getCookie(abTrackingCookieName));
+        var controlVsVariant = "";
+        var bucket = getCookie(abTrackingCookieName);
+        // TODO: this could be more elegant
+        if (bucket === controlName) {
+          controlVsVariant = "control";
+        } else if (bucket === variantName) {
+          controlVsVariant = "variant";
+        }
+
+        $('#bucket-name').html("Bucket: "+bucket+"["+controlVsVariant+"]");
 
         $('#actionLink').click(function(e) {
           // On successful conversion
           Abba(testName).complete();
           $('#feedback').html("link clicked, test completed");
           $('.alert').show();
+        });
+
+        $('#signal1').click(function(e) {
+          Abba(testName).signal("signal one");
+          var label = $(this).html();
+          $(this).html(label+" - fired!");
+        });
+
+        $('#signal2').click(function(e) {
+          Abba(testName).signal("signal two");
+          var label = $(this).html();
+          $(this).html(label+" - fired!");
+        });
+
+        $('#signal3').click(function(e) {
+          Abba(testName).signal("signal three");
+          var label = $(this).html();
+          $(this).html(label+" - fired!");
         });
 
         $('#setControl').click(function(e) {
